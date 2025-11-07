@@ -61,59 +61,59 @@ public class ActionService {
     @Transactional
     public Action createActionInGroup(
             Long actionGroupId,
-            Action action,
+            Action actionParam,
             CurrentUser currentUser
     ) {
         // DB Insert
-        action.setActionGroupId(actionGroupId);
-        action.setOwnerId(currentUser.getUserId());
-        action.setLandingId(TSID.fast().toString()); // actionType과 관계없이 고유한 LandingId 부여
+        actionParam.setActionGroupId(actionGroupId);
+        actionParam.setOwnerId(currentUser.getUserId());
+        actionParam.setLandingId(TSID.fast().toString()); // actionType과 관계없이 고유한 LandingId 부여
 
-        validateActionType(action); // actionType 검증
+        validateActionType(actionParam); // actionType 검증
 
         // Action 저장
-        Action actionResult = actionMapper.save(action);
+        Action actionResult = actionMapper.save(actionParam);
 
         // Action ID 세팅
-        for (ActionRule actionRule : action.getActionRules()) {
+        for (ActionRule actionRule : actionParam.getActionRules()) {
             actionRule.setActionId(actionResult.getId());
         }
         // Action Rule 저장
-        actionRuleService.saveAll(action.getActionRules(), currentUser);
+        actionRuleService.saveAll(actionParam.getActionRules(), currentUser);
         List<ActionRule> actionRuleResult = actionRuleService.findAllActionRuleByActionId(actionResult.getId());
         actionResult.setActionRules(actionRuleResult);
 
-        actionCacheManager.updateActionCache(action);
+        actionCacheManager.updateActionCache(actionResult);
 
         return actionResult;
     }
 
     public Action updateActionById(
-            Action action,
+            Action actionParam,
             CurrentUser currentUser
     ) {
-        var currentAction = getActionById(action.getId(), currentUser); // 존재여부 확인, 없으면 exception
-        action.setOwnerId(currentUser.getUserId());
+        var currentAction = getActionById(actionParam.getId(), currentUser); // 존재여부 확인, 없으면 exception
+        actionParam.setOwnerId(currentUser.getUserId());
 
-        validateActionType(action); // actionType 검증
+        validateActionType(actionParam); // actionType 검증
         
         // DB Update
-        Action actionResult = actionMapper.updateById(action);
+        Action actionResult = actionMapper.updateById(actionParam);
         
         // TODO AWS처럼 action rule 개별 업데이트 및 삭제가 가능해야할수도?
         //  현재는 전체 삭제 후 다시 insert 중임
         // Action Rule 삭제 후 저장
         actionRuleService.deleteAllByActionId(actionResult.getId());
 
-        for (ActionRule actionRule : action.getActionRules()) {
+        for (ActionRule actionRule : actionParam.getActionRules()) {
             actionRule.setActionId(actionResult.getId());
         }
-        actionRuleService.saveAll(action.getActionRules(), currentUser);
+        actionRuleService.saveAll(actionParam.getActionRules(), currentUser);
 
         List<ActionRule> actionRuleResult = actionRuleService.findAllActionRuleByActionId(actionResult.getId());
         actionResult.setActionRules(actionRuleResult);
 
-        actionCacheManager.updateActionCache(action);
+        actionCacheManager.updateActionCache(actionResult);
 
         return actionResult;
     }
