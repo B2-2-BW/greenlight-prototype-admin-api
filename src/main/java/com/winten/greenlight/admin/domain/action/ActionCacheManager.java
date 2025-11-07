@@ -28,10 +28,10 @@ public class ActionCacheManager {
         }
 
         // landingId를 기준으로 action을 조회할 수 있는 기능을 위해 redis에 key로 저장
-//        if (action.getActionType() == ActionType.LANDING) {
-        String landingMappingKey = keyBuilder.landingCacheKey(action.getLandingId());
-        redisWriter.put(landingMappingKey, String.valueOf(action.getId()));
-//        }
+        if (action.getActionType() == ActionType.LANDING) {
+            String landingMappingKey = keyBuilder.landingCacheKey(action.getLandingId());
+            redisWriter.put(landingMappingKey, String.valueOf(action.getId()));
+        }
     }
 
     /**
