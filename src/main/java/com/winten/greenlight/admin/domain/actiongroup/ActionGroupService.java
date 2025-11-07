@@ -58,7 +58,7 @@ public class ActionGroupService {
         ActionGroup result = actionGroupMapper.save(actionGroup);
 
         // Redis put
-        actionGroupCacheManager.updateActionGroupMetaCache(actionGroup);
+        actionGroupCacheManager.updateActionGroupMetaCache(result);
 
         return result;
     }
@@ -72,7 +72,7 @@ public class ActionGroupService {
         ActionGroup result = actionGroupMapper.updateById(actionGroup);
 
         // Redis put
-        actionGroupCacheManager.updateActionGroupMetaCache(actionGroup);
+        actionGroupCacheManager.updateActionGroupMetaCache(result);
 
         // 활성화 상태 변경 시 action 캐시 업데이트
         if (currentActionGroup.getEnabled() != result.getEnabled()) {
